@@ -42,7 +42,7 @@ public class RenterRepository {
                     "JOIN location l ON renter.renter_zip_code = l.zip_code " +
                     "WHERE renter_id = ?";
             stmt = connection.prepareStatement(query);
-            stmt.setString(1, Integer.toString(renterId));
+            stmt.setInt(1, renterId);
 
             rs = stmt.executeQuery();
             // rs.next() will return false if no match found.
@@ -125,6 +125,7 @@ public class RenterRepository {
         return false;
     }
 
+    // TODO Update to use renter object
     public static void updateRenter(int renterId) {
         Connection connection = null;
         PreparedStatement stmt = null;
