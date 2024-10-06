@@ -9,7 +9,7 @@ public class CarRepository {
             connection = DatabaseManager.getInstance().getConnection(); // Get connection from Singleton
             String query = "INSERT INTO car " +
                     "(car_registration_number, car_registration_date, car_odometer, car_motor_size, car_has_automatic_gear, car_has_aircondition, car_has_cruise_control, car_seat_amount, car_horse_power, car_model_id, car_fuel_type_id) " +
-                    "VALUES (?,?,?,?,?,?,?,?,?,?,?);";
+                    "VALUES (?,?,?,?,?,?,?,?,?,(SELECT car_model_id FROM car_model WHERE car_model_name = ? ORDER BY car_model_id LIMIT 1), (SELECT fuel_type_id FROM fuel_type WHERE fuel_type_name = ? ORDER BY fuel_type_id LIMIT 1));";
             stmt = connection.prepareStatement(query);
             stmt.setString(1, "X-123456"); // car_registration_number
             stmt.setDate(2, java.sql.Date.valueOf("1999-01-01")); // car_registration_date
@@ -20,8 +20,8 @@ public class CarRepository {
             stmt.setBoolean(7, true); // car_has_cruise_control
             stmt.setInt(8, 7); // car_seat_amount
             stmt.setInt(9, 275); // car_horse_power
-            stmt.setInt(10, 1); // car_model_id
-            stmt.setInt(11, 1); // car_fuel_type_id
+            stmt.setString(10, "Ford"); // car_model_name
+            stmt.setString(11, "Diesel"); // fuel_type_name
             stmt.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
             // This will catch foreign key constraint violations (error code 1452)
@@ -33,7 +33,7 @@ public class CarRepository {
         }
     }
 
-    public static void getCarById(int carId) {
+    public static Car getCarById(int carId) {
         Connection connection;
         PreparedStatement stmt;
         ResultSet rs;
