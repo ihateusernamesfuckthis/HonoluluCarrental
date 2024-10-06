@@ -1,8 +1,10 @@
+
 import java.sql.*;
+import java.util.ArrayList;
 
 public class RenterRepository {
 
-    public static void addRenter() {
+    public void addRenter(Renter renter) {
         Connection connection = null;
         PreparedStatement stmt = null;
 
@@ -12,14 +14,14 @@ public class RenterRepository {
                     "(renter_drivers_license, renter_drivers_license_issue_date, renter_name, renter_mobile_phone, renter_phone, renter_email, renter_street_address, renter_zip_code) " +
                     "VALUES (?,?,?,?,?,?,?,?);";
             stmt = connection.prepareStatement(query);
-            stmt.setString(1, "1545897");//renter.getRenterDriversLicense());
-            stmt.setDate(2, java.sql.Date.valueOf("1999-01-01"));//renter.getRenterDriversLicenseIssueDate());
-            stmt.setString(3, "renter.getRenterName()");
-            stmt.setString(4, "60815237");// renter.getRenterMobilePhone());
-            stmt.setString(5, "60815237");//renter.getRenterPhone());
-            stmt.setString(6, "renter.getRenterEmail()");
-            stmt.setString(7, "renter.getRenterStreetAddress()");
-            stmt.setString(8, "3520"); // renter.getRenterZipCode());
+            stmt.setString(1, renter.getDriversLicense()); // renter_drivers_license
+            stmt.setDate(2, java.sql.Date.valueOf(renter.getDriversLicenseIssueDate().toString())); // renter_drivers_license_issue_date
+            stmt.setString(3, renter.getName()); // renter_name
+            stmt.setString(4, renter.getMobilePhone()); // renter_mobile_phone
+            stmt.setString(5, renter.getPhone()); // renter_phone
+            stmt.setString(6, renter.getEmail()); // renter_email
+            stmt.setString(7, renter.getStreetAddress()); // renter_street_address
+            stmt.setString(8, renter.getZipCode()); // renter_zip_code (Zipcode is foreign key to Location table)
             stmt.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
             // This will catch foreign key constraint violations (error code 1452)
@@ -31,7 +33,7 @@ public class RenterRepository {
         }
     }
 
-    public static void getRenterById(int renterId) {
+    public Renter getRenterById(int renterId) {
         Connection connection;
         PreparedStatement stmt;
         ResultSet rs;
@@ -48,28 +50,32 @@ public class RenterRepository {
             // rs.next() will return false if no match found.
             // We only want the first result found, as ID should be unique and only return 1
             if (rs.next()) {
-                // TODO Update to use renter object and return renter
-                System.out.println(rs.getString("renter_drivers_license"));
-                System.out.println(rs.getDate("renter_drivers_license_issue_date"));
-                System.out.println(rs.getString("renter_name"));
-                System.out.println(rs.getString("renter_mobile_phone"));
-                System.out.println(rs.getString("renter_phone"));
-                System.out.println(rs.getString("renter_email"));
-                System.out.println(rs.getString("renter_street_address"));
-                System.out.println(rs.getString("renter_zip_code"));
-                System.out.println(rs.getString("city_name"));
+                Renter renter = new Renter(
+                        rs.getInt("renter_id"),
+                        rs.getString("renter_drivers_license"),
+                        rs.getDate("renter_drivers_license_issue_date").toLocalDate(),
+                        rs.getString("renter_name"),
+                        rs.getString("renter_mobile_phone"),
+                        rs.getString("renter_phone"),
+                        rs.getString("renter_email"),
+                        rs.getString("renter_street_address"),
+                        rs.getString("renter_zip_code")
+                );
+                return renter;
             } else {
-                // TODO Update to use renter object and return null if no renter found
                 System.out.println("No renter found with ID " + renterId);
+                return null;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             DatabaseManager.getInstance().closeConnection(); // Close connection
         }
+
+        return null;
     }
 
-    public static void getRenterByName(String name) {
+    public List<Renter> getRentersByName(String name) {
         Connection connection;
         PreparedStatement stmt;
         ResultSet rs;
@@ -83,26 +89,34 @@ public class RenterRepository {
             stmt.setString(1, name);
 
             rs = stmt.executeQuery();
+
+            List<Renter> renters = new ArrayList<>();
             while (rs.next()) {
-                // TODO Update to use renter object and return list of renters
-                System.out.println(rs.getString("renter_drivers_license"));
-                System.out.println(rs.getDate("renter_drivers_license_issue_date"));
-                System.out.println(rs.getString("renter_name"));
-                System.out.println(rs.getString("renter_mobile_phone"));
-                System.out.println(rs.getString("renter_phone"));
-                System.out.println(rs.getString("renter_email"));
-                System.out.println(rs.getString("renter_street_address"));
-                System.out.println(rs.getString("renter_zip_code"));
-                System.out.println(rs.getString("city_name"));
+                Renter renter = new Renter(
+                        rs.getInt("renter_id"),
+                        rs.getString("renter_drivers_license"),
+                        rs.getDate("renter_drivers_license_issue_date").toLocalDate(),
+                        rs.getString("renter_name"),
+                        rs.getString("renter_mobile_phone"),
+                        rs.getString("renter_phone"),
+                        rs.getString("renter_email"),
+                        rs.getString("renter_street_address"),
+                        rs.getString("renter_zip_code")
+                );
+                renters.add(renter);
             }
+
+            return renters;
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             DatabaseManager.getInstance().closeConnection(); // Close connection
         }
+
+        return null;
     }
 
-    public static boolean deleteRenterById(int id) {
+    public boolean deleteRenterById(int id) {
         Connection connection;
         PreparedStatement stmt;
 
@@ -125,8 +139,7 @@ public class RenterRepository {
         return false;
     }
 
-    // TODO Update to use renter object
-    public static void updateRenter(int renterId) {
+    public void updateRenter(Renter renter) {
         Connection connection = null;
         PreparedStatement stmt = null;
 
@@ -140,15 +153,15 @@ public class RenterRepository {
                     "WHERE renter_id = ?";
 
             stmt = connection.prepareStatement(query);
-            stmt.setString(1, "1545893");//renter.getRenterDriversLicense());
-            stmt.setDate(2, java.sql.Date.valueOf("1999-01-02"));//renter.getRenterDriversLicenseIssueDate());
-            stmt.setString(3, "Rune");
-            stmt.setString(4, "60815233");// renter.getRenterMobilePhone());
-            stmt.setString(5, "60815234");//renter.getRenterPhone());
-            stmt.setString(6, "rune@roeddik.net");
-            stmt.setString(7, "pilegårdsvej 85");
-            stmt.setString(8, "3500"); // renter.getRenterZipCode());
-            stmt.setInt(9, renterId);
+            stmt.setString(1, renter.getDriversLicense());
+            stmt.setDate(2, java.sql.Date.valueOf(renter.getDriversLicenseIssueDate()));
+            stmt.setString(3, renter.getName());
+            stmt.setString(4, renter.getMobilePhone());
+            stmt.setString(5, renter.getPhone());
+            stmt.setString(6, renter.getEmail());
+            stmt.setString(7, renter.getStreetAddress());
+            stmt.setString(8, renter.getZipCode());
+            stmt.setInt(9, renter.getId());
             stmt.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
             // This will catch foreign key constraint violations (error code 1452)

@@ -1,8 +1,17 @@
 import java.sql.*;
 
-public class rentalContractRepository {
+public class RentalContractRepository {
 
-    public static void addRentalContract() {
+    public RenterRepository renterRepository;
+
+    public CarRepository carRepository;
+
+    public RentalContractRepository(RenterRepository renterRepository, CarRepository carRepository) {
+        this.renterRepository = renterRepository;
+        this.carRepository = carRepository;
+    }
+
+    public void addRentalContract(RentalContract rentalContract) {
         Connection connection = null;
         PreparedStatement stmt = null;
 
@@ -12,12 +21,12 @@ public class rentalContractRepository {
                     "(rental_contract_renter_id, rental_contract_car_id, rental_contract_from_date, rental_contract_to_date, rental_contract_max_km_allowed, rental_contract_car_odometer_at_start) " +
                     "VALUES (?,?,?,?,?,?);";
             stmt = connection.prepareStatement(query);
-            stmt.setInt(1, 1); // rental_contract_renter_id
-            stmt.setInt(2, 1); // rental_contract_car_id
-            stmt.setDate(3, java.sql.Date.valueOf("2020-01-01")); // rental_contract_from_date
-            stmt.setDate(4, java.sql.Date.valueOf("2020-01-31")); // rental_contract_to_date
-            stmt.setInt(5, 500); // rental_contract_max_km_allowed
-            stmt.setInt(6, 0); // rental_contract_car_odometer_at_start
+            stmt.setInt(1, rentalContract.getRenter().getId()); // rental_contract_renter_id
+            stmt.setInt(2, rentalContract.getCar().getId()); // rental_contract_car_id
+            stmt.setDate(3, java.sql.Date.valueOf(rentalContract.getFromDate().toString())); // rental_contract_from_date
+            stmt.setDate(4, java.sql.Date.valueOf(rentalContract.getToDate().toString())); // rental_contract_to_date
+            stmt.setInt(5, rentalContract.getMaxKmAllowed()); // rental_contract_max_km_allowed
+            stmt.setInt(6, rentalContract.getCarOdometerAtStart()); // rental_contract_car_odometer_at_start
             stmt.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
             // This will catch foreign key constraint violations (error code 1452)
@@ -29,14 +38,14 @@ public class rentalContractRepository {
         }
     }
 
-    public static void getRentalContractById(int rentalContractId) {
+    public RentalContract getRentalContractById(int rentalContractId) {
         Connection connection;
         PreparedStatement stmt;
         ResultSet rs;
 
         try {
             connection = DatabaseManager.getInstance().getConnection(); // Get connection from Singleton
-            String query = "SELECT rental_contract_renter_id, rental_contract_car_id, rental_contract_from_date, rental_contract_to_date, rental_contract_max_km_allowed, rental_contract_car_odometer_at_start " +
+            String query = "SELECT rental_contract_id, rental_contract_renter_id, rental_contract_car_id, rental_contract_from_date, rental_contract_to_date, rental_contract_max_km_allowed, rental_contract_car_odometer_at_start " +
                     "FROM rental_contract " +
                     "WHERE rental_contract_id = ?";
             stmt = connection.prepareStatement(query);
@@ -46,25 +55,28 @@ public class rentalContractRepository {
             // rs.next() will return false if no match found.
             // We only want the first result found, as ID should be unique and only return 1
             if (rs.next()) {
-                // TODO Update to use rentalContract object and return rentalContract
-                Renter renter = RenterRepository.getRenterById(rs.getInt("rental_contract_renter_id"));
-                Car car = CarRepository.getCarById(rs.getInt("rental_contract_car_id"));
-                System.out.println("From date: " + rs.getDate("rental_contract_from_date"));
-                System.out.println("To date: " + rs.getDate("rental_contract_to_date"));
-                System.out.println("Max km allowed: " + rs.getInt("rental_contract_max_km_allowed"));
-                System.out.println("Car odometer at start: " + rs.getInt("rental_contract_car_odometer_at_start"));
+                RentalContract rentalContract = new RentalContract(
+                        rs.getInt("rental_contract_id"),
+                        renterRepository.getRenterById(rs.getInt("rental_contract_renter_id")),
+                        carRepository.getCarById(rs.getInt("rental_contract_car_id")),
+                        rs.getDate("rental_contract_from_date").toLocalDate(),
+                        rs.getDate("rental_contract_to_date").toLocalDate(),
+                        rs.getInt("rental_contract_max_km_allowed"),
+                        rs.getInt("rental_contract_car_odometer_at_start")
+                );
+                return rentalContract;
             } else {
-                // TODO Update to use rentalContract object and return null if no result found
-                System.out.println("No rentalContract found with ID " + rentalContractId);
+                return null;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             DatabaseManager.getInstance().closeConnection(); // Close connection
         }
+        return null;
     }
 
-    public static boolean deleteRentalContractById(int rentalContractId) {
+    public boolean deleteRentalContractById(int rentalContractId) {
         Connection connection;
         PreparedStatement stmt;
 
@@ -87,8 +99,7 @@ public class rentalContractRepository {
         return false;
     }
 
-    // TODO Update to accept contract object as parameter
-    public static void updateRentalContract(int RentalContractId) {
+    public void updateRentalContract(RentalContract rentalContract) {
         Connection connection = null;
         PreparedStatement stmt = null;
 
@@ -104,13 +115,13 @@ public class rentalContractRepository {
                     "WHERE rental_contract_id = ?";
 
             stmt = connection.prepareStatement(query);
-            stmt.setInt(1, 1); // rental_contract_renter_id
-            stmt.setInt(2, 1); // rental_contract_car_id
-            stmt.setDate(3, java.sql.Date.valueOf("1999-01-01")); // rental_contract_from_date
-            stmt.setDate(4, java.sql.Date.valueOf("1999-01-01")); // rental_contract_to_date
-            stmt.setInt(5, 1000); // rental_contract_max_km_allowed
-            stmt.setInt(6, 0); // rental_contract_car_odometer_at_start
-            stmt.setInt(7, RentalContractId); // rental_contract_id
+            stmt.setInt(1, rentalContract.getRenter().getId()); // rental_contract_renter_id
+            stmt.setInt(2, rentalContract.getCar().getId()); // rental_contract_car_id
+            stmt.setDate(3, java.sql.Date.valueOf(rentalContract.getFromDate().toString())); // rental_contract_from_date
+            stmt.setDate(4, java.sql.Date.valueOf(rentalContract.getToDate().toString())); // rental_contract_to_date
+            stmt.setInt(5, rentalContract.getMaxKmAllowed()); // rental_contract_max_km_allowed
+            stmt.setInt(6, rentalContract.getCarOdometerAtStart()); // rental_contract_car_odometer_at_start
+            stmt.setInt(7, rentalContract.getId()); // rental_contract_id
             stmt.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
             // This will catch foreign key constraint violations (error code 1452)

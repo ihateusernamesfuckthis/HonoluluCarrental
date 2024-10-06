@@ -1,7 +1,7 @@
 import java.sql.*;
 
 public class CarRepository {
-    public static void addCar() {
+    public void addCar(Car car) {
         Connection connection = null;
         PreparedStatement stmt = null;
 
@@ -11,17 +11,17 @@ public class CarRepository {
                     "(car_registration_number, car_registration_date, car_odometer, car_motor_size, car_has_automatic_gear, car_has_aircondition, car_has_cruise_control, car_seat_amount, car_horse_power, car_model_id, car_fuel_type_id) " +
                     "VALUES (?,?,?,?,?,?,?,?,?,(SELECT car_model_id FROM car_model WHERE car_model_name = ? ORDER BY car_model_id LIMIT 1), (SELECT fuel_type_id FROM fuel_type WHERE fuel_type_name = ? ORDER BY fuel_type_id LIMIT 1));";
             stmt = connection.prepareStatement(query);
-            stmt.setString(1, "X-123456"); // car_registration_number
-            stmt.setDate(2, java.sql.Date.valueOf("1999-01-01")); // car_registration_date
-            stmt.setInt(3, 98050); // car_odometer
-            stmt.setInt(4, 3500); // car_motor_size
-            stmt.setBoolean(5, true); // car_has_automatic_gear
-            stmt.setBoolean(6, true); // car_has_aircondition
-            stmt.setBoolean(7, true); // car_has_cruise_control
-            stmt.setInt(8, 7); // car_seat_amount
-            stmt.setInt(9, 275); // car_horse_power
-            stmt.setString(10, "Ford"); // car_model_name
-            stmt.setString(11, "Diesel"); // fuel_type_name
+            stmt.setString(1, car.getRegistrationNumber()); // car_registration_number
+            stmt.setDate(2, java.sql.Date.valueOf(car.getRegistrationDate().toString())); // car_registration_date
+            stmt.setInt(3, car.getOdometer()); // car_odometer
+            stmt.setInt(4, car.getMotorSize()); // car_motor_size
+            stmt.setBoolean(5, car.isHasAutomaticGear()); // car_has_automatic_gear
+            stmt.setBoolean(6, car.isHasAircondition()); // car_has_aircondition
+            stmt.setBoolean(7, car.isHasCruiseControl()); // car_has_cruise_control
+            stmt.setInt(8, car.getSeatAmount()); // car_seat_amount
+            stmt.setInt(9, car.getHorsePower()); // car_horse_power
+            stmt.setString(10, car.getModelName()); // car_model_name (Car brand is a foreign key in car model table, so no need to update it)
+            stmt.setString(11, car.getFuelTypeName()); // fuel_type_name
             stmt.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
             // This will catch foreign key constraint violations (error code 1452)
@@ -33,7 +33,7 @@ public class CarRepository {
         }
     }
 
-    public static Car getCarById(int carId) {
+    public Car getCarById(int carId) {
         Connection connection;
         PreparedStatement stmt;
         ResultSet rs;
@@ -53,31 +53,36 @@ public class CarRepository {
             // rs.next() will return false if no match found.
             // We only want the first result found, as ID should be unique and only return 1
             if (rs.next()) {
-                // TODO Update to use car object and return car
-                System.out.println("Car registration number: " + rs.getString("car_registration_number"));
-                System.out.println("Car registration date: " + rs.getDate("car_registration_date"));
-                System.out.println("Car odometer: " + rs.getInt("car_odometer"));
-                System.out.println("Car motor size: " + rs.getInt("car_motor_size"));
-                System.out.println("Car has automatic gear: " + rs.getBoolean("car_has_automatic_gear"));
-                System.out.println("Car has aircondition: " + rs.getBoolean("car_has_aircondition"));
-                System.out.println("Car has cruise control: " + rs.getBoolean("car_has_cruise_control"));
-                System.out.println("Car seat amount: " + rs.getInt("car_seat_amount"));
-                System.out.println("Car horse power: " + rs.getInt("car_horse_power"));
-                System.out.println("Car brand name: " + rs.getString("car_brand_name"));
-                System.out.println("Car model name: " + rs.getString("car_model_name"));
-                System.out.println("Car fuel type name: " + rs.getString("fuel_type_name"));
+                Car car = new Car(
+                        carId,
+                        rs.getString("car_registration_number"),
+                        rs.getDate("car_registration_date").toLocalDate(),
+                        rs.getInt("car_odometer"),
+                        rs.getInt("car_motor_size"),
+                        rs.getBoolean("car_has_automatic_gear"),
+                        rs.getBoolean("car_has_aircondition"),
+                        rs.getBoolean("car_has_cruise_control"),
+                        rs.getInt("car_seat_amount"),
+                        rs.getInt("car_horse_power"),
+                        rs.getString("car_brand_name"),
+                        rs.getString("car_model_name"),
+                        rs.getString("fuel_type_name")
+                );
+                return car;
             } else {
-                // TODO Update to use car object and return null if no car found
                 System.out.println("No car found with ID " + carId);
+                return null;
             }
         } catch (SQLException e) {
             e.printStackTrace();
         } finally {
             DatabaseManager.getInstance().closeConnection(); // Close connection
         }
+
+        return null;
     }
 
-    public static boolean deleteCarById(int carId) {
+    public boolean deleteCarById(int carId) {
         Connection connection;
         PreparedStatement stmt;
 
@@ -100,8 +105,7 @@ public class CarRepository {
         return false;
     }
 
-    // TODO update to take in car object
-    public static void updateCar(int carId) {
+    public void updateCar(Car car) {
         Connection connection = null;
         PreparedStatement stmt = null;
 
@@ -117,23 +121,23 @@ public class CarRepository {
                     "car_has_cruise_control = ?, " +
                     "car_seat_amount = ?, " +
                     "car_horse_power = ?, " +
-                    "car_model_id = ?, " +
-                    "car_fuel_type_id = ? " +
+                    "(SELECT car_model_id FROM car_model WHERE car_model_name = ? ORDER BY car_model_id LIMIT 1), " +
+                    "(SELECT fuel_type_id FROM fuel_type WHERE fuel_type_name = ? ORDER BY fuel_type_id LIMIT 1) " +
                     "WHERE car_id = ?";
 
             stmt = connection.prepareStatement(query);
-            stmt.setString(1, "X-123456"); // car_registration_number
-            stmt.setDate(2, java.sql.Date.valueOf("1999-01-01")); // car_registration_date
-            stmt.setInt(3, 98050); // car_odometer
-            stmt.setInt(4, 3500); // car_motor_size
-            stmt.setBoolean(5, true); // car_has_automatic_gear
-            stmt.setBoolean(6, true); // car_has_aircondition
-            stmt.setBoolean(7, true); // car_has_cruise_control
-            stmt.setInt(8, 7); // car_seat_amount
-            stmt.setInt(9, 275); // car_horse_power
-            stmt.setInt(10, 1); // car_model_id
-            stmt.setInt(11, 1); // car_fuel_type_id
-            stmt.setInt(12, carId); // car_id
+            stmt.setString(1, car.getRegistrationNumber()); // car_registration_number
+            stmt.setDate(2, java.sql.Date.valueOf(car.getRegistrationDate().toString())); // car_registration_date
+            stmt.setInt(3, car.getOdometer()); // car_odometer
+            stmt.setInt(4, car.getMotorSize()); // car_motor_size
+            stmt.setBoolean(5, car.isHasAutomaticGear()); // car_has_automatic_gear
+            stmt.setBoolean(6, car.isHasAircondition()); // car_has_aircondition
+            stmt.setBoolean(7, car.isHasCruiseControl()); // car_has_cruise_control
+            stmt.setInt(8, car.getSeatAmount()); // car_seat_amount
+            stmt.setInt(9, car.getHorsePower()); // car_horse_power
+            stmt.setString(10, car.getModelName()); // car_model_id
+            stmt.setString(11, car.getFuelTypeName()); // car_fuel_type_id
+            stmt.setInt(12, car.getId()); // car_id
             stmt.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
             // This will catch foreign key constraint violations (error code 1452)
