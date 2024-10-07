@@ -2,8 +2,8 @@ import java.sql.*;
 
 public class CarRepository {
     public void addCar(Car car) {
-        Connection connection = null;
-        PreparedStatement stmt = null;
+        Connection connection;
+        PreparedStatement stmt;
 
         try {
             connection = DatabaseManager.getInstance().getConnection(); // Get connection from Singleton
@@ -16,12 +16,12 @@ public class CarRepository {
             stmt.setInt(3, car.getOdometer()); // car_odometer
             stmt.setInt(4, car.getMotorSize()); // car_motor_size
             stmt.setBoolean(5, car.isHasAutomaticGear()); // car_has_automatic_gear
-            stmt.setBoolean(6, car.isHasAircondition()); // car_has_aircondition
+            stmt.setBoolean(6, car.isHasAirCondition()); // car_has_aircondition
             stmt.setBoolean(7, car.isHasCruiseControl()); // car_has_cruise_control
             stmt.setInt(8, car.getSeatAmount()); // car_seat_amount
             stmt.setInt(9, car.getHorsePower()); // car_horse_power
-            stmt.setString(10, car.getModelName()); // car_model_name (Car brand is a foreign key in car model table, so no need to update it)
-            stmt.setString(11, car.getFuelTypeName()); // fuel_type_name
+            stmt.setString(10, car.getModel()); // car_model_name (Car brand is a foreign key in car model table, so no need to update it)
+            stmt.setString(11, car.getFuelType()); // fuel_type_name
             stmt.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {
             // This will catch foreign key constraint violations (error code 1452)
@@ -131,12 +131,12 @@ public class CarRepository {
             stmt.setInt(3, car.getOdometer()); // car_odometer
             stmt.setInt(4, car.getMotorSize()); // car_motor_size
             stmt.setBoolean(5, car.isHasAutomaticGear()); // car_has_automatic_gear
-            stmt.setBoolean(6, car.isHasAircondition()); // car_has_aircondition
+            stmt.setBoolean(6, car.isHasAirCondition()); // car_has_aircondition
             stmt.setBoolean(7, car.isHasCruiseControl()); // car_has_cruise_control
             stmt.setInt(8, car.getSeatAmount()); // car_seat_amount
             stmt.setInt(9, car.getHorsePower()); // car_horse_power
-            stmt.setString(10, car.getModelName()); // car_model_id
-            stmt.setString(11, car.getFuelTypeName()); // car_fuel_type_id
+            stmt.setString(10, car.getModel()); // car_model_id
+            stmt.setString(11, car.getFuelType()); // car_fuel_type_id
             stmt.setInt(12, car.getId()); // car_id
             stmt.executeUpdate();
         } catch (SQLIntegrityConstraintViolationException e) {

@@ -1,72 +1,138 @@
+import java.time.LocalDate;
+
 public class Car {
+    private int id;
+    private String registrationNumber;
+    private LocalDate registrationDate;
+    private int odometer;
+    private int motorSize;
+    private boolean hasAutomaticGear;
+    private boolean hasAirCondition;
+    private boolean hasCruiseControl;
+    private int seatAmount;
+    private int horsePower;
     private String brand;
     private String model;
     private String fuelType;
-    private String registrationNumber;
 
-    private int firstRegistrationYear;
-    private int firstRegistrationMonth;
-    private int odometer;
-
-    public Car(String brand, String model, String fuelType, String registrationNumber, int firstRegistrationYear, int firstRegistrationMonth, int odometer) {
+    public Car(int id, String registrationNumber, LocalDate registrationDate, int odometer, int motorSize, boolean hasAutomaticGear, boolean hasAirCondition, boolean hasCruiseControl, int seatAmount, int horsePower, String brand, String model, String fuelType) {
+        this.id = id;
+        this.registrationNumber = registrationNumber;
+        this.registrationDate = registrationDate;
+        this.odometer = odometer;
+        this.motorSize = motorSize;
+        this.hasAutomaticGear = hasAutomaticGear;
+        this.hasAirCondition = hasAirCondition;
+        this.hasCruiseControl = hasCruiseControl;
+        this.seatAmount = seatAmount;
+        this.horsePower = horsePower;
         this.brand = brand;
         this.model = model;
         this.fuelType = fuelType;
-        this.registrationNumber = registrationNumber;
-        this.firstRegistrationYear = firstRegistrationYear;
-        this.firstRegistrationMonth = firstRegistrationMonth;
-        this.odometer = odometer;
     }
 
-    public String toFileString() {
-        return brand + ";" + model + ";" + fuelType + ";" + registrationNumber + ";" + firstRegistrationYear + ";" + firstRegistrationMonth + ";" + odometer;
+    public int getId() {
+        return id;
     }
 
-    public static Car fromString(String str){
-        String[] parts = str.split(";");
-        if (parts.length < 7) {
-            throw new IllegalArgumentException("String format incorrect, missing fields");
-        }
-        try{
-            String brand = parts[0];
-            String model = parts[1];
-            String fuelType = parts[2];
-            String registrationNumber = parts[3];
-            int firstRegistrationYear = Integer.parseInt(parts[4]);
-            int firstRegistrationMonth = Integer.parseInt(parts[5]);
-            int odometer = Integer.parseInt(parts[6]);
-
-            return new Car(brand, model, fuelType, registrationNumber, firstRegistrationYear, firstRegistrationMonth, odometer);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("One of the integers fields is not valid", e);
-        }
-    }
-    public String getBrand() {
-        return brand;
-    }
-
-    public String getModel() {
-        return model;
-    }
-
-    public String getFuelType() {
-        return fuelType;
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getRegistrationNumber() {
         return registrationNumber;
     }
 
-    public int getFirstRegistrationYear() {
-        return firstRegistrationYear;
+    public void setRegistrationNumber(String registrationNumber) {
+        this.registrationNumber = registrationNumber;
     }
 
-    public int getFirstRegistrationMonth() {
-        return firstRegistrationMonth;
+    public LocalDate getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(LocalDate registrationDate) {
+        this.registrationDate = registrationDate;
     }
 
     public int getOdometer() {
         return odometer;
+    }
+
+    public void setOdometer(int odometer) {
+        this.odometer = odometer;
+    }
+
+    public int getMotorSize() {
+        return motorSize;
+    }
+
+    public void setMotorSize(int motorSize) {
+        this.motorSize = motorSize;
+    }
+
+    public boolean isHasAutomaticGear() {
+        return hasAutomaticGear;
+    }
+
+    public void setHasAutomaticGear(boolean hasAutomaticGear) {
+        this.hasAutomaticGear = hasAutomaticGear;
+    }
+
+    public boolean isHasAirCondition() {
+        return hasAirCondition;
+    }
+
+    public void setHasAirCondition(boolean hasAirCondition) {
+        this.hasAirCondition = hasAirCondition;
+    }
+
+    public boolean isHasCruiseControl() {
+        return hasCruiseControl;
+    }
+
+    public void setHasCruiseControl(boolean hasCruiseControl) {
+        this.hasCruiseControl = hasCruiseControl;
+    }
+
+    public int getSeatAmount() {
+        return seatAmount;
+    }
+
+    public void setSeatAmount(int seatAmount) {
+        this.seatAmount = seatAmount;
+    }
+
+    public int getHorsePower() {
+        return horsePower;
+    }
+
+    public void setHorsePower(int horsePower) {
+        this.horsePower = horsePower;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getFuelType() {
+        return fuelType;
+    }
+
+    public void setFuelType(String fuelType) {
+        this.fuelType = fuelType;
     }
 }
 
